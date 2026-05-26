@@ -1,1 +1,15 @@
-<Solution />
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DotNetWind.Cli/DotNetWind.Cli.csproj" />
+    <Project Path="src/DotNetWind.Core/DotNetWind.Core.csproj" />
+    <Project Path="src/DotNetWind.ProjectSystem/DotNetWind.ProjectSystem.csproj" />
+    <Project Path="src/DotNetWind.Tailwind/DotNetWind.Tailwind.csproj" />
+    <Project Path="src/DotNetWind.Templates/DotNetWind.Templates.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DotNetWind.Core.Tests/DotNetWind.Core.Tests.csproj" />
+    <Project Path="tests/DotNetWind.ProjectSystem.Tests/DotNetWind.ProjectSystem.Tests.csproj" />
+    <Project Path="tests/DotNetWind.Tailwind.Tests/DotNetWind.Tailwind.Tests.csproj" />
+    <Project Path="tests/DotNetWind.Cli.Tests/DotNetWind.Cli.Tests.csproj" />
+  </Folder>
+</Solution>
