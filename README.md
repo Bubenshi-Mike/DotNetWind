@@ -140,7 +140,7 @@ After `dotnetwind init`, your project will have:
 
 ## Requirements
 
-- .NET 9.0 SDK or later
+- .NET 10 SDK or later
 - Node.js 18+ and npm
 
 ## Architecture
