@@ -29,11 +29,11 @@ jobs:
       - name: Test
         run: |
           for proj in tests/*/*.csproj; do
-            dotnet test "$proj" -c Release --no-restore
+            dotnet test "$proj" -c Release
           done
 
       - name: Pack
-        run: dotnet pack src/DotNetWind.Cli/DotNetWind.Cli.csproj -c Release --no-restore
+        run: dotnet pack src/DotNetWind.Cli/DotNetWind.Cli.csproj -c Release
 
       - name: NuGet login (OIDC)
         uses: NuGet/login@v1
