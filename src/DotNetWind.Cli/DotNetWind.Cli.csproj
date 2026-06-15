@@ -12,13 +12,18 @@
     <PackageOutputPath>../../nupkg</PackageOutputPath>
     <PackageId>DotNetWind</PackageId>
     <Version>0.1.0-preview</Version>
-    <Authors>DotNetWind Contributors</Authors>
+    <Authors>Bubenshi</Authors>
     <Description>Tailwind CSS setup for .NET, without the pain.</Description>
     <PackageTags>tailwind;blazor;aspnetcore;css;dotnet-tool</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/bubenshi-mike/dotnetwind</RepositoryUrl>
-    <Nullable>enable</Nullable>
+    <PackageProjectUrl>https://github.com/Bubenshi-Mike/DotNetWind</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Bubenshi-Mike/DotNetWind</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNetWind.Core\DotNetWind.Core.csproj" />
     <ProjectReference Include="..\DotNetWind.ProjectSystem\DotNetWind.ProjectSystem.csproj" />
