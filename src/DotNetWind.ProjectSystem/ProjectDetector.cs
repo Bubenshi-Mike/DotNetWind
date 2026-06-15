@@ -42,7 +42,7 @@ public sealed class ProjectDetector : IProjectDetector
         if (projectPath is not null)
         {
             if (projectPath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) && _fileSystem.FileExists(projectPath))
-                return Path.GetFullPath(projectPath);
+                return projectPath;
 
             return null;
         }
