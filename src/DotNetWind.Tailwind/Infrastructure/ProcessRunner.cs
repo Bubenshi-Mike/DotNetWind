@@ -86,8 +86,23 @@ public sealed class ProcessRunner : IProcessRunner
         return new ProcessResult(process.ExitCode, outputBuilder.ToString(), errorBuilder.ToString());
     }
 
-    private static ProcessStartInfo BuildStartInfo(string fileName, string arguments, string workingDirectory) =>
-        new()
+    private static ProcessStartInfo BuildStartInfo(string fileName, string arguments, string workingDirectory)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c {fileName} {arguments}",
+                WorkingDirectory = workingDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+        }
+
+        return new ProcessStartInfo
         {
             FileName = fileName,
             Arguments = arguments,
@@ -97,11 +112,7 @@ public sealed class ProcessRunner : IProcessRunner
             UseShellExecute = false,
             CreateNoWindow = true
         };
-
-    private static string ResolveExecutable(string fileName)
-    {
-        if (OperatingSystem.IsWindows() && !fileName.Contains('.'))
-            return fileName + ".cmd";
-        return fileName;
     }
+
+    private static string ResolveExecutable(string fileName) => fileName;
 }
