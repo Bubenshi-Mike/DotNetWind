@@ -1,23 +1,24 @@
-using System.CommandLine;
-using DotNetWind.Cli.Output;
-using DotNetWind.Core.UseCases;
-
 namespace DotNetWind.Cli.Commands;
 
 public static class InfoCommand
 {
     public static Command Create(IServiceProvider services)
     {
-        var command = new Command("info", "Display project and tool information");
-
-        var projectOption = new Option<string?>("--project", "Path to the .csproj file");
-
-        command.AddOption(projectOption);
-
-        command.SetHandler(async (context) =>
+        var command = new Command("info")
         {
-            var project = context.ParseResult.GetValueForOption(projectOption);
-            var cancellationToken = context.GetCancellationToken();
+            Description = "Display project and tool information"
+        };
+
+        var projectOption = new Option<string?>("--project")
+        {
+            Description = "Path to the .csproj file"
+        };
+
+        command.Options.Add(projectOption);
+
+        command.SetAction(async (parseResult, cancellationToken) =>
+        {
+            var project = parseResult.GetValue(projectOption);
 
             var console = (IConsoleOutput)services.GetService(typeof(IConsoleOutput))!;
             var useCase = (InfoUseCase)services.GetService(typeof(InfoUseCase))!;
@@ -29,8 +30,7 @@ public static class InfoCommand
             if (result.IsFailure)
             {
                 console.WriteError(result.ErrorMessage!);
-                context.ExitCode = Core.Models.ExitCode.GeneralFailure;
-                return;
+                return ExitCode.GeneralFailure;
             }
 
             var report = result.Value!;
@@ -45,6 +45,8 @@ public static class InfoCommand
                 ("npm", report.NpmVersion ?? "not found"),
                 ("Tailwind CLI", report.TailwindCliInstalled ? "installed" : "not installed"),
             ]);
+
+            return ExitCode.Success;
         });
 
         return command;

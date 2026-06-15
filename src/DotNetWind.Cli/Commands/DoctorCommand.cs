@@ -1,27 +1,30 @@
-using System.CommandLine;
-using DotNetWind.Cli.Output;
-using DotNetWind.Core.Models;
-using DotNetWind.Core.UseCases;
-
 namespace DotNetWind.Cli.Commands;
 
 public static class DoctorCommand
 {
     public static Command Create(IServiceProvider services)
     {
-        var command = new Command("doctor", "Validate the Tailwind CSS setup");
-
-        var projectOption = new Option<string?>("--project", "Path to the .csproj file");
-        var jsonOption = new Option<bool>("--json", "Output results as JSON");
-
-        command.AddOption(projectOption);
-        command.AddOption(jsonOption);
-
-        command.SetHandler(async (context) =>
+        var command = new Command("doctor")
         {
-            var project = context.ParseResult.GetValueForOption(projectOption);
-            var asJson = context.ParseResult.GetValueForOption(jsonOption);
-            var cancellationToken = context.GetCancellationToken();
+            Description = "Validate the Tailwind CSS setup"
+        };
+
+        var projectOption = new Option<string?>("--project")
+        {
+            Description = "Path to the .csproj file"
+        };
+        var jsonOption = new Option<bool>("--json")
+        {
+            Description = "Output results as JSON"
+        };
+
+        command.Options.Add(projectOption);
+        command.Options.Add(jsonOption);
+
+        command.SetAction(async (parseResult, cancellationToken) =>
+        {
+            var project = parseResult.GetValue(projectOption);
+            var asJson = parseResult.GetValue(jsonOption);
 
             var console = (IConsoleOutput)services.GetService(typeof(IConsoleOutput))!;
             var useCase = (DoctorUseCase)services.GetService(typeof(DoctorUseCase))!;
@@ -39,7 +42,7 @@ public static class DoctorCommand
                     PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
                 });
                 Console.WriteLine(json);
-                return;
+                return ExitCode.Success;
             }
 
             foreach (var check in checks)
@@ -71,18 +74,17 @@ public static class DoctorCommand
             if (failCount == 0 && warnCount == 0)
             {
                 console.WriteSuccess("Tailwind CSS appears to be correctly configured.");
-                context.ExitCode = ExitCode.Success;
+                return ExitCode.Success;
             }
-            else if (failCount == 0)
+
+            if (failCount == 0)
             {
                 console.WriteWarning($"Setup has {warnCount} warning(s). Review the items above.");
-                context.ExitCode = ExitCode.Success;
+                return ExitCode.Success;
             }
-            else
-            {
-                console.WriteError($"Setup has {failCount} failure(s) and {warnCount} warning(s). Run 'dotnetwind init' to fix.");
-                context.ExitCode = ExitCode.ValidationFailed;
-            }
+
+            console.WriteError($"Setup has {failCount} failure(s) and {warnCount} warning(s). Run 'dotnetwind init' to fix.");
+            return ExitCode.ValidationFailed;
         });
 
         return command;

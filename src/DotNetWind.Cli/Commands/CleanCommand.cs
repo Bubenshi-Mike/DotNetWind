@@ -1,27 +1,31 @@
-using System.CommandLine;
-using DotNetWind.Cli.Output;
-using DotNetWind.Core.Models;
-using DotNetWind.Core.UseCases;
-
 namespace DotNetWind.Cli.Commands;
 
 public static class CleanCommand
 {
     public static Command Create(IServiceProvider services)
     {
-        var command = new Command("clean", "Remove generated Tailwind CSS output files");
-
-        var projectOption = new Option<string?>("--project", "Path to the .csproj file");
-        var outputOption = new Option<string>("--output", () => "wwwroot/css/style.css", "CSS output path to remove");
-
-        command.AddOption(projectOption);
-        command.AddOption(outputOption);
-
-        command.SetHandler(async (context) =>
+        var command = new Command("clean")
         {
-            var project = context.ParseResult.GetValueForOption(projectOption);
-            var output = context.ParseResult.GetValueForOption(outputOption)!;
-            var cancellationToken = context.GetCancellationToken();
+            Description = "Remove generated Tailwind CSS output files"
+        };
+
+        var projectOption = new Option<string?>("--project")
+        {
+            Description = "Path to the .csproj file"
+        };
+        var outputOption = new Option<string>("--output")
+        {
+            Description = "CSS output path to remove",
+            DefaultValueFactory = _ => "wwwroot/css/style.css"
+        };
+
+        command.Options.Add(projectOption);
+        command.Options.Add(outputOption);
+
+        command.SetAction(async (parseResult, cancellationToken) =>
+        {
+            var project = parseResult.GetValue(projectOption);
+            var output = parseResult.GetValue(outputOption)!;
 
             var console = (IConsoleOutput)services.GetService(typeof(IConsoleOutput))!;
             var useCase = (CleanUseCase)services.GetService(typeof(CleanUseCase))!;
@@ -34,11 +38,11 @@ public static class CleanCommand
             if (result.IsFailure)
             {
                 console.WriteError(result.ErrorMessage!);
-                context.ExitCode = ExitCode.GeneralFailure;
-                return;
+                return ExitCode.GeneralFailure;
             }
 
             console.WriteSuccess($"Removed: {result.Value}");
+            return ExitCode.Success;
         });
 
         return command;

@@ -1,36 +1,50 @@
-using System.CommandLine;
-using DotNetWind.Cli.Output;
-using DotNetWind.Core.Models;
-using DotNetWind.Core.UseCases;
-
 namespace DotNetWind.Cli.Commands;
 
 public static class BuildCommand
 {
     public static Command Create(IServiceProvider services)
     {
-        var command = new Command("build", "Build Tailwind CSS");
-
-        var projectOption = new Option<string?>("--project", "Path to the .csproj file");
-        var inputOption = new Option<string>("--input", () => "Styles/tailwind.css", "Tailwind CSS input path");
-        var outputOption = new Option<string>("--output", () => "wwwroot/css/style.css", "CSS output path");
-        var minifyOption = new Option<bool>("--minify", "Minify the output CSS");
-        var verboseOption = new Option<bool>("--verbose", "Show detailed output");
-
-        command.AddOption(projectOption);
-        command.AddOption(inputOption);
-        command.AddOption(outputOption);
-        command.AddOption(minifyOption);
-        command.AddOption(verboseOption);
-
-        command.SetHandler(async (context) =>
+        var command = new Command("build")
         {
-            var project = context.ParseResult.GetValueForOption(projectOption);
-            var input = context.ParseResult.GetValueForOption(inputOption)!;
-            var output = context.ParseResult.GetValueForOption(outputOption)!;
-            var minify = context.ParseResult.GetValueForOption(minifyOption);
-            var verbose = context.ParseResult.GetValueForOption(verboseOption);
-            var cancellationToken = context.GetCancellationToken();
+            Description = "Build Tailwind CSS"
+        };
+
+        var projectOption = new Option<string?>("--project")
+        {
+            Description = "Path to the .csproj file"
+        };
+        var inputOption = new Option<string>("--input")
+        {
+            Description = "Tailwind CSS input path",
+            DefaultValueFactory = _ => "Styles/tailwind.css"
+        };
+        var outputOption = new Option<string>("--output")
+        {
+            Description = "CSS output path",
+            DefaultValueFactory = _ => "wwwroot/css/style.css"
+        };
+        var minifyOption = new Option<bool>("--minify")
+        {
+            Description = "Minify the output CSS"
+        };
+        var verboseOption = new Option<bool>("--verbose")
+        {
+            Description = "Show detailed output"
+        };
+
+        command.Options.Add(projectOption);
+        command.Options.Add(inputOption);
+        command.Options.Add(outputOption);
+        command.Options.Add(minifyOption);
+        command.Options.Add(verboseOption);
+
+        command.SetAction(async (parseResult, cancellationToken) =>
+        {
+            var project = parseResult.GetValue(projectOption);
+            var input = parseResult.GetValue(inputOption)!;
+            var output = parseResult.GetValue(outputOption)!;
+            var minify = parseResult.GetValue(minifyOption);
+            var verbose = parseResult.GetValue(verboseOption);
 
             var console = (IConsoleOutput)services.GetService(typeof(IConsoleOutput))!;
             var useCase = (BuildUseCase)services.GetService(typeof(BuildUseCase))!;
@@ -50,11 +64,11 @@ public static class BuildCommand
             if (result.IsFailure)
             {
                 console.WriteError(result.ErrorMessage!);
-                context.ExitCode = ExitCode.GeneralFailure;
-                return;
+                return ExitCode.GeneralFailure;
             }
 
             console.WriteSuccess($"Tailwind CSS built → {output}");
+            return ExitCode.Success;
         });
 
         return command;
