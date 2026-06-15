@@ -1,5 +1,3 @@
-using DotNetWind.Core.Models;
-
 namespace DotNetWind.Core.Abstractions;
 
 public interface ITailwindRunner

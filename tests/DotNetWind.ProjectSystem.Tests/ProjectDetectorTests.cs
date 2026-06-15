@@ -1,8 +1,3 @@
-using DotNetWind.Core.Models;
-using DotNetWind.ProjectSystem.Tests.Fakes;
-using Microsoft.Extensions.Logging.Abstractions;
-using Shouldly;
-
 namespace DotNetWind.ProjectSystem.Tests;
 
 public sealed class ProjectDetectorTests
@@ -24,7 +19,7 @@ public sealed class ProjectDetectorTests
     public async Task DetectAsync_WithBlazorWasmSdk_ReturnsBlazorWebAssembly()
     {
         var fs = BuildFileSystem(
-            """<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly"><PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup></Project>""",
+            """<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>""",
             f =>
             {
                 f.AddFile(Path.Combine(ProjectDir, "wwwroot", "index.html"), "<html/>");
@@ -36,14 +31,14 @@ public sealed class ProjectDetectorTests
 
         result.IsSuccess.ShouldBeTrue();
         result.Value!.ProjectType.ShouldBe(DotNetProjectType.BlazorWebAssembly);
-        result.Value.TargetFramework.ShouldBe("net9.0");
+        result.Value.TargetFramework.ShouldBe("net10.0");
     }
 
     [Fact]
     public async Task DetectAsync_WithBlazorWebAppStructure_ReturnsBlazorWebApp()
     {
         var fs = BuildFileSystem(
-            """<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup></Project>""",
+            """<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>""",
             f =>
             {
                 f.AddFile(Path.Combine(ProjectDir, "Components", "App.razor"), "@code {}");
@@ -61,7 +56,7 @@ public sealed class ProjectDetectorTests
     public async Task DetectAsync_WithMvcStructure_ReturnsMvc()
     {
         var fs = BuildFileSystem(
-            """<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup></Project>""",
+            """<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>""",
             f =>
             {
                 f.AddDirectory(Path.Combine(ProjectDir, "Controllers"));
@@ -80,7 +75,7 @@ public sealed class ProjectDetectorTests
     public async Task DetectAsync_WithRazorPagesStructure_ReturnsRazorPages()
     {
         var fs = BuildFileSystem(
-            """<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net9.0</TargetFramework></PropertyGroup></Project>""",
+            """<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>""",
             f =>
             {
                 f.AddDirectory(Path.Combine(ProjectDir, "Pages"));

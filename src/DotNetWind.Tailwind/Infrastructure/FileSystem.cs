@@ -1,5 +1,3 @@
-using DotNetWind.Core.Abstractions;
-
 namespace DotNetWind.Tailwind.Infrastructure;
 
 public sealed class FileSystem : IFileSystem

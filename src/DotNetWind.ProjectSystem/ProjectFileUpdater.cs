@@ -1,8 +1,3 @@
-using DotNetWind.Core.Abstractions;
-using DotNetWind.Core.Models;
-using DotNetWind.Templates;
-using Microsoft.Extensions.Logging;
-
 namespace DotNetWind.ProjectSystem;
 
 public sealed class ProjectFileUpdater : IProjectFileUpdater

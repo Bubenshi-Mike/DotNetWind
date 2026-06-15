@@ -1,7 +1,3 @@
-using DotNetWind.Tailwind.Tests.Fakes;
-using Microsoft.Extensions.Logging.Abstractions;
-using Shouldly;
-
 namespace DotNetWind.Tailwind.Tests;
 
 public sealed class PackageJsonManagerTests

@@ -1,7 +1,3 @@
-using DotNetWind.Core.Abstractions;
-using DotNetWind.Core.Models;
-using Microsoft.Extensions.Logging;
-
 namespace DotNetWind.Tailwind;
 
 public sealed class DoctorService : IDoctorService

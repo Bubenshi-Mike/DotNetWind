@@ -1,7 +1,4 @@
 using System.Diagnostics;
-using DotNetWind.Core.Abstractions;
-using DotNetWind.Core.Models;
-using Microsoft.Extensions.Logging;
 
 namespace DotNetWind.Tailwind.Infrastructure;
 
