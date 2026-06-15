@@ -1,8 +1,5 @@
-using DotNetWind.Cli.Output;
-using DotNetWind.Core.UseCases;
 using DotNetWind.ProjectSystem;
 using DotNetWind.Tailwind;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetWind.Cli.DependencyInjection;

@@ -1,6 +1,3 @@
-using DotNetWind.Core.Models;
-using Shouldly;
-
 namespace DotNetWind.Core.Tests.Models;
 
 public sealed class ResultTests

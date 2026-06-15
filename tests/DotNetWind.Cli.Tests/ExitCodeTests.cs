@@ -1,6 +1,3 @@
-using DotNetWind.Core.Models;
-using Shouldly;
-
 namespace DotNetWind.Cli.Tests;
 
 public sealed class ExitCodeTests

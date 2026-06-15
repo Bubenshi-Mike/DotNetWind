@@ -1,6 +1,3 @@
-using DotNetWind.Core.Models;
-using Shouldly;
-
 namespace DotNetWind.Core.Tests.Models;
 
 public sealed class ProjectInfoTests
@@ -15,7 +12,7 @@ public sealed class ProjectInfoTests
     [InlineData(DotNetProjectType.Unknown, "Unknown")]
     public void GetDisplayName_ShouldReturnCorrectLabel(DotNetProjectType type, string expected)
     {
-        var info = new ProjectInfo("/path/App.csproj", "/path", "App", "net9.0", type);
+        var info = new ProjectInfo("/path/App.csproj", "/path", "App", "net10.0", type);
         info.GetDisplayName().ShouldBe(expected);
     }
 }

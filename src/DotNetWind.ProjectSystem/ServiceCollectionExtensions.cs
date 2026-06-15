@@ -1,6 +1,3 @@
-using DotNetWind.Core.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace DotNetWind.ProjectSystem;
 
 public static class ServiceCollectionExtensions

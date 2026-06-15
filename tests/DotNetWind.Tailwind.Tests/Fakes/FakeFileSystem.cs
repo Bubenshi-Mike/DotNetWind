@@ -1,5 +1,3 @@
-using DotNetWind.Core.Abstractions;
-
 namespace DotNetWind.Tailwind.Tests.Fakes;
 
 public sealed class FakeFileSystem : IFileSystem

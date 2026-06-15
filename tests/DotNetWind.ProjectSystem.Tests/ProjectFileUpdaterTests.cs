@@ -1,9 +1,3 @@
-using DotNetWind.Core.Models;
-using DotNetWind.ProjectSystem.Tests.Fakes;
-using DotNetWind.Templates;
-using Microsoft.Extensions.Logging.Abstractions;
-using Shouldly;
-
 namespace DotNetWind.ProjectSystem.Tests;
 
 public sealed class ProjectFileUpdaterTests
@@ -15,7 +9,7 @@ public sealed class ProjectFileUpdaterTests
         """
         <Project Sdk="Microsoft.NET.Sdk.Web">
           <PropertyGroup>
-            <TargetFramework>net9.0</TargetFramework>
+            <TargetFramework>net10.0</TargetFramework>
           </PropertyGroup>
         </Project>
         """;
@@ -24,7 +18,7 @@ public sealed class ProjectFileUpdaterTests
         new(fs, NullLogger<ProjectFileUpdater>.Instance);
 
     private static ProjectInfo CreateProject(DotNetProjectType type = DotNetProjectType.BlazorWebApp) =>
-        new(CsprojPath, ProjectDir, "MyApp", "net9.0", type);
+        new(CsprojPath, ProjectDir, "MyApp", "net10.0", type);
 
     private static TailwindPaths CreatePaths() =>
         new(

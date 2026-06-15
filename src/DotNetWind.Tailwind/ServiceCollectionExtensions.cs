@@ -1,6 +1,4 @@
-using DotNetWind.Core.Abstractions;
 using DotNetWind.Tailwind.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetWind.Tailwind;
 

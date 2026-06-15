@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace DotNetWind.Templates;
 
 public static class PackageJsonTemplate

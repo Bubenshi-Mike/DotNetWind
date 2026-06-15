@@ -1,10 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using DotNetWind.Core.Abstractions;
-using DotNetWind.Core.Models;
-using DotNetWind.Templates;
-using Microsoft.Extensions.Logging;
-
 namespace DotNetWind.Tailwind;
 
 public sealed class PackageJsonManager : IPackageJsonManager
