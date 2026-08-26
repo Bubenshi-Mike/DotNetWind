@@ -91,6 +91,24 @@ public sealed class ProjectDetectorTests
     }
 
     [Fact]
+    public async Task DetectAsync_WithRazorSdk_ReturnsRazorClassLibrary()
+    {
+        var fs = BuildFileSystem(
+            """<Project Sdk="Microsoft.NET.Sdk.Razor"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>""",
+            f =>
+            {
+                f.AddDirectory(ProjectDir);
+                f.AddFile(Path.Combine(ProjectDir, "wwwroot", "index.html"), "<html/>");
+            });
+
+        var detector = CreateDetector(fs);
+        var result = await detector.DetectAsync(Path.Combine(ProjectDir, "MyApp.csproj"));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value!.ProjectType.ShouldBe(DotNetProjectType.RazorClassLibrary);
+    }
+
+    [Fact]
     public async Task DetectAsync_InvalidPath_ReturnsFailure()
     {
         var fs = new FakeFileSystem();
