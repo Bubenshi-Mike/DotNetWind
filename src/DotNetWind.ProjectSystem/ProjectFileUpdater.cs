@@ -1,3 +1,5 @@
+using System.Xml.Linq;
+
 namespace DotNetWind.ProjectSystem;
 
 public sealed class ProjectFileUpdater : IProjectFileUpdater
@@ -40,11 +42,51 @@ public sealed class ProjectFileUpdater : IProjectFileUpdater
         return HasTailwindTarget(content);
     }
 
+    public async Task<Result> RemoveTailwindBuildTargetAsync(
+        string projectFilePath,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_fileSystem.FileExists(projectFilePath))
+            return Result.Success();
+
+        var content = await _fileSystem.ReadAllTextAsync(projectFilePath, cancellationToken);
+        var updatedContent = RemoveTarget(content);
+
+        if (!string.Equals(content, updatedContent, StringComparison.Ordinal))
+            await _fileSystem.WriteAllTextAsync(projectFilePath, updatedContent, cancellationToken);
+
+        return Result.Success();
+    }
+
     private static bool HasTailwindTarget(string content) =>
-        content.Contains($"Name=\"{MsBuildTargetTemplate.TargetName}\"", StringComparison.Ordinal);
+        TryParseProject(content, out var document)
+            ? document.Descendants().Any(e =>
+                e.Name.LocalName == "Target" &&
+                string.Equals((string?)e.Attribute("Name"), MsBuildTargetTemplate.TargetName, StringComparison.Ordinal))
+            : content.Contains($"Name=\"{MsBuildTargetTemplate.TargetName}\"", StringComparison.Ordinal);
 
     private static string InjectTarget(string content)
     {
+        if (TryParseProject(content, out var document) && document.Root is not null)
+        {
+            var ns = document.Root.Name.Namespace;
+            document.Root.Add(
+                new XElement(ns + "Target",
+                    new XAttribute("Name", MsBuildTargetTemplate.TargetName),
+                    new XAttribute("BeforeTargets", "Build"),
+                    new XElement(ns + "Message",
+                        new XAttribute("Text", "Building Tailwind CSS..."),
+                        new XAttribute("Importance", "high")),
+                    new XElement(ns + "Exec",
+                        new XAttribute("Command", "npm run tw:build"),
+                        new XAttribute("Condition", "'$(Configuration)' == 'Debug'")),
+                    new XElement(ns + "Exec",
+                        new XAttribute("Command", "npm run tw:build:min"),
+                        new XAttribute("Condition", "'$(Configuration)' == 'Release'"))));
+
+            return document.ToString(SaveOptions.DisableFormatting);
+        }
+
         const string closingTag = "</Project>";
         var insertIndex = content.LastIndexOf(closingTag, StringComparison.OrdinalIgnoreCase);
         if (insertIndex < 0)
@@ -52,5 +94,40 @@ public sealed class ProjectFileUpdater : IProjectFileUpdater
 
         var target = Environment.NewLine + MsBuildTargetTemplate.GetTarget() + Environment.NewLine;
         return content.Insert(insertIndex, target);
+    }
+
+    private static string RemoveTarget(string content)
+    {
+        if (!TryParseProject(content, out var document))
+            return content;
+
+        var targets = document
+            .Descendants()
+            .Where(e =>
+                e.Name.LocalName == "Target" &&
+                string.Equals((string?)e.Attribute("Name"), MsBuildTargetTemplate.TargetName, StringComparison.Ordinal))
+            .ToList();
+
+        if (targets.Count == 0)
+            return content;
+
+        foreach (var target in targets)
+            target.Remove();
+
+        return document.ToString(SaveOptions.DisableFormatting);
+    }
+
+    private static bool TryParseProject(string content, out XDocument document)
+    {
+        try
+        {
+            document = XDocument.Parse(content, LoadOptions.PreserveWhitespace);
+            return true;
+        }
+        catch
+        {
+            document = new XDocument();
+            return false;
+        }
     }
 }

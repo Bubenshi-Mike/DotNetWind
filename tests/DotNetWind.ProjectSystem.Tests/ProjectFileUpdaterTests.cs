@@ -90,6 +90,23 @@ public sealed class ProjectFileUpdaterTests
         hasTarget.ShouldBeFalse();
     }
 
+    [Fact]
+    public async Task RemoveTailwindBuildTargetAsync_WhenTargetPresent_RemovesTarget()
+    {
+        var content = EmptyCsproj.Replace(
+            "</Project>",
+            $"<Target Name=\"{MsBuildTargetTemplate.TargetName}\" BeforeTargets=\"Build\"></Target></Project>");
+
+        var fs = new FakeFileSystem();
+        fs.AddFile(CsprojPath, content);
+
+        var updater = CreateUpdater(fs);
+        var result = await updater.RemoveTailwindBuildTargetAsync(CsprojPath);
+
+        result.IsSuccess.ShouldBeTrue();
+        fs.GetWrittenContent(CsprojPath)!.ShouldNotContain($"Name=\"{MsBuildTargetTemplate.TargetName}\"");
+    }
+
     private static int CountOccurrences(string text, string pattern)
     {
         var count = 0;

@@ -10,4 +10,5 @@ public interface IPackageJsonManager
 
     Task<bool> HasTailwindScriptsAsync(string packageJsonPath, CancellationToken cancellationToken = default);
     Task<bool> HasTailwindDependenciesAsync(string packageJsonPath, CancellationToken cancellationToken = default);
+    Task<Result> RemoveTailwindEntriesAsync(string packageJsonPath, CancellationToken cancellationToken = default);
 }
