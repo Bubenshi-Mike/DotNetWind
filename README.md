@@ -116,6 +116,8 @@ Options:
   --no-backup             Do not create .bak files before editing project/package files
 ```
 
+By default, `uninstall` creates `.dotnetwind.bak` backups for the project file and `package.json` before editing them.
+
 ## Supported Project Types
 
 - Blazor WebAssembly

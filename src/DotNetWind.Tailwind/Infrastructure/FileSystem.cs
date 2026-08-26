@@ -16,6 +16,9 @@ public sealed class FileSystem : IFileSystem
 
     public void DeleteFile(string path) => File.Delete(path);
 
+    public void CopyFile(string sourcePath, string destinationPath, bool overwrite) =>
+        File.Copy(sourcePath, destinationPath, overwrite);
+
     public IEnumerable<string> EnumerateFiles(string directory, string searchPattern, SearchOption searchOption) =>
         Directory.EnumerateFiles(directory, searchPattern, searchOption);
 }

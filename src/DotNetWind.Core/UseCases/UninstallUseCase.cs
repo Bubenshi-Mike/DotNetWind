@@ -38,6 +38,12 @@ public sealed class UninstallUseCase
         if (options.DryRun)
             return Result.Success();
 
+        if (options.Backup)
+        {
+            BackupIfExists(project.ProjectFilePath);
+            BackupIfExists(packageJsonPath);
+        }
+
         var packageResult = await _packageJsonManager.RemoveTailwindEntriesAsync(packageJsonPath, cancellationToken);
         if (packageResult.IsFailure)
             return packageResult;
@@ -53,5 +59,15 @@ public sealed class UninstallUseCase
             _fileSystem.DeleteFile(inputCssPath);
 
         return Result.Success();
+    }
+
+    private void BackupIfExists(string path)
+    {
+        if (!_fileSystem.FileExists(path))
+            return;
+
+        var backupPath = path + ".dotnetwind.bak";
+        _fileSystem.CopyFile(path, backupPath, overwrite: true);
+        _logger.LogDebug("Created backup: {Path}", backupPath);
     }
 }
