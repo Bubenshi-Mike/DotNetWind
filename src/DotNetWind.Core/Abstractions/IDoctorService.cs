@@ -3,6 +3,6 @@ namespace DotNetWind.Core.Abstractions;
 public interface IDoctorService
 {
     Task<IReadOnlyList<DoctorCheckResult>> RunChecksAsync(
-        string? projectPath,
+        DoctorOptions options,
         CancellationToken cancellationToken = default);
 }

@@ -1,3 +1,5 @@
+using System.Xml.Linq;
+
 namespace DotNetWind.ProjectSystem;
 
 public sealed class ProjectDetector : IProjectDetector
@@ -57,13 +59,35 @@ public sealed class ProjectDetector : IProjectDetector
 
     private static string? ExtractTargetFramework(string content)
     {
-        const string open = "<TargetFramework>";
-        const string close = "</TargetFramework>";
-        var start = content.IndexOf(open, StringComparison.Ordinal);
-        if (start < 0) return null;
-        start += open.Length;
-        var end = content.IndexOf(close, start, StringComparison.Ordinal);
-        return end < 0 ? null : content[start..end].Trim();
+        try
+        {
+            var document = XDocument.Parse(content);
+            var targetFramework = document
+                .Descendants()
+                .FirstOrDefault(e => e.Name.LocalName == "TargetFramework")
+                ?.Value
+                .Trim();
+
+            if (!string.IsNullOrWhiteSpace(targetFramework))
+                return targetFramework;
+
+            return document
+                .Descendants()
+                .FirstOrDefault(e => e.Name.LocalName == "TargetFrameworks")
+                ?.Value
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .FirstOrDefault();
+        }
+        catch
+        {
+            const string open = "<TargetFramework>";
+            const string close = "</TargetFramework>";
+            var start = content.IndexOf(open, StringComparison.Ordinal);
+            if (start < 0) return null;
+            start += open.Length;
+            var end = content.IndexOf(close, start, StringComparison.Ordinal);
+            return end < 0 ? null : content[start..end].Trim();
+        }
     }
 
     private DotNetProjectType DetectProjectType(string content, string projectDirectory)

@@ -36,6 +36,8 @@ That's it. DotNetWind will:
 | `dotnetwind doctor` | Validate the Tailwind setup |
 | `dotnetwind clean` | Remove generated CSS output |
 | `dotnetwind info` | Display project and tool information |
+| `dotnetwind repair` | Re-apply missing DotNetWind setup files/configuration |
+| `dotnetwind uninstall` | Remove DotNetWind build configuration and generated CSS output |
 
 ## Command Options
 
@@ -46,10 +48,14 @@ dotnetwind init [options]
 
 Options:
   --project <path>        Path to the .csproj file
+  --framework <type>      Project type if auto-detection is ambiguous
+                          Values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages
   --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
   --output <path>         CSS output path (default: wwwroot/css/style.css)
   --skip-npm-install      Skip running npm install
+  --skip-node-install     Do not install Node.js automatically if node/npm are missing
   --skip-build            Skip running initial Tailwind build
+  --yes                   Allow non-interactive installation of missing prerequisites
   --force                 Overwrite existing files
   --verbose               Show detailed output
 ```
@@ -72,6 +78,36 @@ dotnetwind doctor [options]
 
 Options:
   --json                  Output results as JSON (useful for CI/CD)
+  --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
+  --output <path>         CSS output path (default: wwwroot/css/style.css)
+```
+
+### `dotnetwind repair`
+
+```bash
+dotnetwind repair [options]
+
+Options:
+  --project <path>        Path to the .csproj file
+  --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
+  --output <path>         CSS output path (default: wwwroot/css/style.css)
+  --skip-npm-install      Skip running npm install
+  --skip-node-install     Do not install Node.js automatically if node/npm are missing
+  --skip-build            Skip running Tailwind build
+  --force                 Overwrite existing Tailwind input file
+  --yes                   Allow non-interactive installation of missing prerequisites
+```
+
+### `dotnetwind uninstall`
+
+```bash
+dotnetwind uninstall [options]
+
+Options:
+  --project <path>        Path to the .csproj file
+  --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
+  --output <path>         CSS output path to remove (default: wwwroot/css/style.css)
+  --force                 Also remove the Tailwind input CSS file
 ```
 
 ## Supported Project Types
@@ -141,7 +177,7 @@ After `dotnetwind init`, your project will have:
 ## Requirements
 
 - .NET 10 SDK or later
-- Node.js 18+ and npm
+- Node.js 18+ and npm. If Node.js/npm are missing, `dotnetwind init --yes` attempts to install Node.js LTS automatically on Windows through `winget`. Use `--skip-node-install` to prevent automatic installation, or `--skip-npm-install --skip-build` for offline/config-only setup.
 
 ## Architecture
 

@@ -28,9 +28,11 @@ public sealed class TailwindRunner : ITailwindRunner
             onError: line => _logger.LogDebug("[npm:err] {Line}", line),
             cancellationToken: cancellationToken);
 
-        return result.IsSuccess
-            ? Result.Success()
-            : Result.Failure($"Tailwind build failed (exit {result.ExitCode}):\n{result.StandardError}");
+        if (result.IsSuccess)
+            return Result.Success();
+
+        var errorKind = result.ExitCode == 127 ? ResultErrorKind.MissingDependency : ResultErrorKind.General;
+        return Result.Failure($"Tailwind build failed (exit {result.ExitCode}):\n{result.StandardError}", errorKind);
     }
 
     public async Task<Result> WatchAsync(

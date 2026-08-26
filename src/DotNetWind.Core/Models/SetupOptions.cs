@@ -6,6 +6,8 @@ public sealed record SetupOptions(
     string InputCssRelativePath = "Styles/tailwind.css",
     string OutputCssRelativePath = "wwwroot/css/style.css",
     bool SkipNpmInstall = false,
+    bool SkipNodeInstall = false,
     bool SkipBuild = false,
     bool Force = false,
+    bool AssumeYes = false,
     bool Verbose = false);

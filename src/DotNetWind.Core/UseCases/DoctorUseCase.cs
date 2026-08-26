@@ -12,10 +12,10 @@ public sealed class DoctorUseCase
     }
 
     public async Task<IReadOnlyList<DoctorCheckResult>> ExecuteAsync(
-        string? projectPath,
+        DoctorOptions options,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Running doctor checks");
-        return await _doctorService.RunChecksAsync(projectPath, cancellationToken);
+        return await _doctorService.RunChecksAsync(options, cancellationToken);
     }
 }

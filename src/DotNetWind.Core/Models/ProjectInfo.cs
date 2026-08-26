@@ -18,8 +18,22 @@ public sealed record ProjectInfo(
         _ => "Unknown"
     };
 
-    public string GetCssLink() =>
-        ProjectType is DotNetProjectType.Mvc or DotNetProjectType.RazorPages
-            ? """<link href="~/css/style.css" rel="stylesheet" />"""
-            : """<link href="css/style.css" rel="stylesheet" />""";
+    public string GetCssLink(string outputCssRelativePath = "wwwroot/css/style.css")
+    {
+        var href = ToWebPath(outputCssRelativePath);
+        if (ProjectType is DotNetProjectType.Mvc or DotNetProjectType.RazorPages)
+            href = "~/" + href;
+
+        return $"""<link href="{href}" rel="stylesheet" />""";
+    }
+
+    public static string ToWebPath(string outputCssRelativePath)
+    {
+        var normalized = outputCssRelativePath.Replace('\\', '/').TrimStart('/');
+        const string wwwrootPrefix = "wwwroot/";
+
+        return normalized.StartsWith(wwwrootPrefix, StringComparison.OrdinalIgnoreCase)
+            ? normalized[wwwrootPrefix.Length..]
+            : normalized;
+    }
 }
