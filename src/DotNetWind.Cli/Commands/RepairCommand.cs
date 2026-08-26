@@ -13,6 +13,10 @@ public static class RepairCommand
         {
             Description = "Path to the .csproj file"
         };
+        var frameworkOption = new Option<string?>("--framework")
+        {
+            Description = "Project type when auto-detection is ambiguous: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library"
+        };
         var inputOption = new Option<string>("--input")
         {
             Description = "Tailwind CSS input path",
@@ -45,6 +49,7 @@ public static class RepairCommand
         };
 
         command.Options.Add(projectOption);
+        command.Options.Add(frameworkOption);
         command.Options.Add(inputOption);
         command.Options.Add(outputOption);
         command.Options.Add(skipNpmOption);
@@ -61,8 +66,16 @@ public static class RepairCommand
             console.WriteHeader("DotNetWind Repair");
             console.WriteAction("Re-applying DotNetWind setup...");
 
+            var framework = parseResult.GetValue(frameworkOption);
+            if (!TryParseProjectType(framework, out var forcedProjectType))
+            {
+                console.WriteError($"Unknown framework '{framework}'. Valid values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library.");
+                return ExitCode.ValidationFailed;
+            }
+
             var options = new SetupOptions(
                 ProjectPath: parseResult.GetValue(projectOption),
+                ForcedProjectType: forcedProjectType,
                 InputCssRelativePath: parseResult.GetValue(inputOption)!,
                 OutputCssRelativePath: parseResult.GetValue(outputOption)!,
                 SkipNpmInstall: parseResult.GetValue(skipNpmOption),
@@ -83,6 +96,23 @@ public static class RepairCommand
         });
 
         return command;
+    }
+
+    private static bool TryParseProjectType(string? value, out DotNetProjectType? projectType)
+    {
+        projectType = value?.Trim().ToLowerInvariant() switch
+        {
+            null or "" => null,
+            "blazor-wasm" or "wasm" or "blazorwebassembly" => DotNetProjectType.BlazorWebAssembly,
+            "blazor-server" or "server" or "blazorserver" => DotNetProjectType.BlazorServer,
+            "blazor-webapp" or "blazor-web-app" or "webapp" or "blazorwebapp" => DotNetProjectType.BlazorWebApp,
+            "mvc" => DotNetProjectType.Mvc,
+            "razor-pages" or "razorpages" => DotNetProjectType.RazorPages,
+            "razor-class-library" or "razorclasslibrary" or "rcl" or "razor-sdk" => DotNetProjectType.RazorClassLibrary,
+            _ => null
+        };
+
+        return value is null || projectType is not null;
     }
 
     private static int ToExitCode(ResultErrorKind errorKind) => errorKind switch
