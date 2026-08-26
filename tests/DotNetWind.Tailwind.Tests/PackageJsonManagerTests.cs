@@ -21,6 +21,7 @@ public sealed class PackageJsonManagerTests
         content.ShouldContain("tw:build");
         content.ShouldContain("tailwindcss");
         content.ShouldContain("@tailwindcss/cli");
+        content.ShouldContain("\"latest\"");
     }
 
     [Fact]
@@ -87,6 +88,41 @@ public sealed class PackageJsonManagerTests
 
         var result = await manager.HasTailwindDependenciesAsync(PackageJsonPath);
         result.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task RemoveTailwindEntriesAsync_RemovesOnlyDotNetWindEntries()
+    {
+        var json =
+            """
+            {
+              "scripts": {
+                "start": "dotnet run",
+                "tw:build": "npx @tailwindcss/cli -i Styles/tailwind.css -o wwwroot/css/style.css",
+                "tw:build:min": "npx @tailwindcss/cli -i Styles/tailwind.css -o wwwroot/css/style.css --minify",
+                "tw:watch": "npx @tailwindcss/cli -i Styles/tailwind.css -o wwwroot/css/style.css --watch"
+              },
+              "devDependencies": {
+                "tailwindcss": "latest",
+                "@tailwindcss/cli": "latest",
+                "vite": "latest"
+              }
+            }
+            """;
+
+        var fs = new FakeFileSystem();
+        fs.AddFile(PackageJsonPath, json);
+        var manager = CreateManager(fs);
+
+        var result = await manager.RemoveTailwindEntriesAsync(PackageJsonPath);
+
+        result.IsSuccess.ShouldBeTrue();
+        var content = fs.GetWrittenContent(PackageJsonPath)!;
+        content.ShouldContain("start");
+        content.ShouldContain("vite");
+        content.ShouldNotContain("tw:build");
+        content.ShouldNotContain("tailwindcss");
+        content.ShouldNotContain("@tailwindcss/cli");
     }
 
     private static int CountOccurrences(string text, string pattern)

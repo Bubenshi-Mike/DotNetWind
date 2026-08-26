@@ -50,6 +50,23 @@ public sealed class PackageJsonManager : IPackageJsonManager
         return devDeps?.ContainsKey("tailwindcss") ?? false;
     }
 
+    public async Task<Result> RemoveTailwindEntriesAsync(string packageJsonPath, CancellationToken cancellationToken = default)
+    {
+        if (!_fileSystem.FileExists(packageJsonPath))
+            return Result.Success();
+
+        var root = await ReadJsonAsync(packageJsonPath, cancellationToken);
+        if (root is null)
+            return Result.Failure("Failed to parse existing package.json.");
+
+        RemoveScripts(root);
+        RemoveDevDependencies(root);
+
+        var serialized = JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true });
+        await _fileSystem.WriteAllTextAsync(packageJsonPath, serialized, cancellationToken);
+        return Result.Success();
+    }
+
     private async Task<Result> MergeIntoExistingAsync(
         string packageJsonPath,
         string input,
@@ -91,6 +108,31 @@ public sealed class PackageJsonManager : IPackageJsonManager
 
         devDeps.TryAdd("@tailwindcss/cli", JsonValue.Create("latest"));
         devDeps.TryAdd("tailwindcss", JsonValue.Create("latest"));
+    }
+
+    private static void RemoveScripts(JsonObject root)
+    {
+        if (root["scripts"] is not JsonObject scripts)
+            return;
+
+        scripts.Remove("tw:build");
+        scripts.Remove("tw:build:min");
+        scripts.Remove("tw:watch");
+
+        if (scripts.Count == 0)
+            root.Remove("scripts");
+    }
+
+    private static void RemoveDevDependencies(JsonObject root)
+    {
+        if (root["devDependencies"] is not JsonObject devDeps)
+            return;
+
+        devDeps.Remove("@tailwindcss/cli");
+        devDeps.Remove("tailwindcss");
+
+        if (devDeps.Count == 0)
+            root.Remove("devDependencies");
     }
 
     private async Task<JsonObject?> ReadJsonAsync(string path, CancellationToken cancellationToken)
