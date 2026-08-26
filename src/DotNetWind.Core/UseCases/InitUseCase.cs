@@ -31,6 +31,9 @@ public sealed class InitUseCase
         if (project.ProjectType == DotNetProjectType.Unknown)
             return Result<ProjectInfo>.Failure($"Could not determine project type for '{project.ProjectName}'. Use --framework to specify the project type.");
 
+        if (options.DryRun)
+            return Result<ProjectInfo>.Success(project);
+
         var paths = new TailwindPaths(
             InputCssPath: Path.Combine(project.ProjectDirectory, options.InputCssRelativePath.Replace('/', Path.DirectorySeparatorChar)),
             OutputCssPath: Path.Combine(project.ProjectDirectory, options.OutputCssRelativePath.Replace('/', Path.DirectorySeparatorChar)),
