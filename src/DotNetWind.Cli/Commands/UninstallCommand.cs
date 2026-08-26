@@ -27,11 +27,21 @@ public static class UninstallCommand
         {
             Description = "Also remove the Tailwind input CSS file"
         };
+        var dryRunOption = new Option<bool>("--dry-run")
+        {
+            Description = "Show what would be removed without changing files"
+        };
+        var noBackupOption = new Option<bool>("--no-backup")
+        {
+            Description = "Do not create .bak files before editing project/package files"
+        };
 
         command.Options.Add(projectOption);
         command.Options.Add(inputOption);
         command.Options.Add(outputOption);
         command.Options.Add(forceOption);
+        command.Options.Add(dryRunOption);
+        command.Options.Add(noBackupOption);
 
         command.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -45,7 +55,9 @@ public static class UninstallCommand
                 ProjectPath: parseResult.GetValue(projectOption),
                 InputCssRelativePath: parseResult.GetValue(inputOption)!,
                 OutputCssRelativePath: parseResult.GetValue(outputOption)!,
-                Force: parseResult.GetValue(forceOption));
+                Force: parseResult.GetValue(forceOption),
+                DryRun: parseResult.GetValue(dryRunOption),
+                Backup: !parseResult.GetValue(noBackupOption));
 
             var result = await useCase.ExecuteAsync(options, cancellationToken);
             if (result.IsFailure)
@@ -54,8 +66,12 @@ public static class UninstallCommand
                 return ToExitCode(result.ErrorKind);
             }
 
-            console.WriteSuccess("DotNetWind setup removed");
-            if (!options.Force)
+            if (options.DryRun)
+                console.WriteSuccess("Dry run complete. No files were changed.");
+            else
+                console.WriteSuccess("DotNetWind setup removed");
+
+            if (!options.Force && !options.DryRun)
                 console.WriteInfo("Tailwind input CSS was left in place. Use --force to remove it.");
 
             return ExitCode.Success;

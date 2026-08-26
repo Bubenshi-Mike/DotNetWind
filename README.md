@@ -57,6 +57,7 @@ Options:
   --skip-build            Skip running initial Tailwind build
   --yes                   Allow non-interactive installation of missing prerequisites
   --force                 Overwrite existing files
+  --dry-run               Show what would be configured without changing files or running commands
   --verbose               Show detailed output
 ```
 
@@ -98,6 +99,7 @@ Options:
   --skip-build            Skip running Tailwind build
   --force                 Overwrite existing Tailwind input file
   --yes                   Allow non-interactive installation of missing prerequisites
+  --dry-run               Show what would be repaired without changing files or running commands
 ```
 
 ### `dotnetwind uninstall`
@@ -110,6 +112,8 @@ Options:
   --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
   --output <path>         CSS output path to remove (default: wwwroot/css/style.css)
   --force                 Also remove the Tailwind input CSS file
+  --dry-run               Show what would be removed without changing files
+  --no-backup             Do not create .bak files before editing project/package files
 ```
 
 ## Supported Project Types

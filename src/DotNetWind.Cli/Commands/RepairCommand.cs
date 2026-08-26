@@ -47,6 +47,10 @@ public static class RepairCommand
         {
             Description = "Allow non-interactive installation of missing prerequisites"
         };
+        var dryRunOption = new Option<bool>("--dry-run")
+        {
+            Description = "Show what would be repaired without changing files or running commands"
+        };
 
         command.Options.Add(projectOption);
         command.Options.Add(frameworkOption);
@@ -57,6 +61,7 @@ public static class RepairCommand
         command.Options.Add(skipBuildOption);
         command.Options.Add(forceOption);
         command.Options.Add(yesOption);
+        command.Options.Add(dryRunOption);
 
         command.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -82,7 +87,8 @@ public static class RepairCommand
                 SkipNodeInstall: parseResult.GetValue(skipNodeInstallOption),
                 SkipBuild: parseResult.GetValue(skipBuildOption),
                 Force: parseResult.GetValue(forceOption),
-                AssumeYes: parseResult.GetValue(yesOption));
+                AssumeYes: parseResult.GetValue(yesOption),
+                DryRun: parseResult.GetValue(dryRunOption));
 
             var result = await useCase.ExecuteAsync(options, cancellationToken);
             if (result.IsFailure)
@@ -91,7 +97,11 @@ public static class RepairCommand
                 return ToExitCode(result.ErrorKind);
             }
 
-            console.WriteSuccess($"Repaired: {result.Value!.ProjectName}");
+            if (options.DryRun)
+                console.WriteSuccess($"Dry run complete for {result.Value!.ProjectName}");
+            else
+                console.WriteSuccess($"Repaired: {result.Value!.ProjectName}");
+
             return ExitCode.Success;
         });
 

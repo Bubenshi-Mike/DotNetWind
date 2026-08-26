@@ -35,6 +35,9 @@ public sealed class UninstallUseCase
         var inputCssPath = Path.Combine(project.ProjectDirectory, options.InputCssRelativePath.Replace('/', Path.DirectorySeparatorChar));
         var outputCssPath = Path.Combine(project.ProjectDirectory, options.OutputCssRelativePath.Replace('/', Path.DirectorySeparatorChar));
 
+        if (options.DryRun)
+            return Result.Success();
+
         var packageResult = await _packageJsonManager.RemoveTailwindEntriesAsync(packageJsonPath, cancellationToken);
         if (packageResult.IsFailure)
             return packageResult;

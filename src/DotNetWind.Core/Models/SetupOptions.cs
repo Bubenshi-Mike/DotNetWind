@@ -10,4 +10,5 @@ public sealed record SetupOptions(
     bool SkipBuild = false,
     bool Force = false,
     bool AssumeYes = false,
+    bool DryRun = false,
     bool Verbose = false);
