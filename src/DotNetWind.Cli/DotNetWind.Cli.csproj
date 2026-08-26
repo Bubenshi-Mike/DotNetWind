@@ -11,7 +11,7 @@
     <ToolCommandName>dotnetwind</ToolCommandName>
     <PackageOutputPath>../../nupkg</PackageOutputPath>
     <PackageId>DotNetWind</PackageId>
-    <Version>0.1.0-preview</Version>
+    <Version>0.1.1-preview</Version>
     <Authors>Bubenshi</Authors>
     <Description>Tailwind CSS setup for .NET, without the pain.</Description>
     <PackageTags>tailwind;blazor;aspnetcore;css;dotnet-tool</PackageTags>
