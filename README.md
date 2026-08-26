@@ -89,6 +89,8 @@ dotnetwind repair [options]
 
 Options:
   --project <path>        Path to the .csproj file
+  --framework <type>      Project type if auto-detection is ambiguous
+                          Values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library
   --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
   --output <path>         CSS output path (default: wwwroot/css/style.css)
   --skip-npm-install      Skip running npm install
