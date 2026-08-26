@@ -10,4 +10,8 @@ public interface IProjectFileUpdater
     Task<bool> HasTailwindBuildTargetAsync(
         string projectFilePath,
         CancellationToken cancellationToken = default);
+
+    Task<Result> RemoveTailwindBuildTargetAsync(
+        string projectFilePath,
+        CancellationToken cancellationToken = default);
 }

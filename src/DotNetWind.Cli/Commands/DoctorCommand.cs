@@ -13,17 +13,31 @@ public static class DoctorCommand
         {
             Description = "Path to the .csproj file"
         };
+        var inputOption = new Option<string>("--input")
+        {
+            Description = "Tailwind CSS input path",
+            DefaultValueFactory = _ => "Styles/tailwind.css"
+        };
+        var outputOption = new Option<string>("--output")
+        {
+            Description = "CSS output path",
+            DefaultValueFactory = _ => "wwwroot/css/style.css"
+        };
         var jsonOption = new Option<bool>("--json")
         {
             Description = "Output results as JSON"
         };
 
         command.Options.Add(projectOption);
+        command.Options.Add(inputOption);
+        command.Options.Add(outputOption);
         command.Options.Add(jsonOption);
 
         command.SetAction(async (parseResult, cancellationToken) =>
         {
             var project = parseResult.GetValue(projectOption);
+            var input = parseResult.GetValue(inputOption)!;
+            var output = parseResult.GetValue(outputOption)!;
             var asJson = parseResult.GetValue(jsonOption);
 
             var console = (IConsoleOutput)services.GetService(typeof(IConsoleOutput))!;
@@ -32,7 +46,12 @@ public static class DoctorCommand
             if (!asJson)
                 console.WriteHeader("DotNetWind Doctor");
 
-            var checks = await useCase.ExecuteAsync(project, cancellationToken);
+            var options = new DoctorOptions(
+                ProjectPath: project,
+                InputCssRelativePath: input,
+                OutputCssRelativePath: output);
+
+            var checks = await useCase.ExecuteAsync(options, cancellationToken);
 
             if (asJson)
             {

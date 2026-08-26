@@ -20,17 +20,10 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: |
-          dotnet restore src/DotNetWind.Cli/DotNetWind.Cli.csproj
-          for proj in tests/*/*.csproj; do
-            dotnet restore "$proj"
-          done
+        run: dotnet restore DotNetWind.slnx
 
       - name: Test
-        run: |
-          for proj in tests/*/*.csproj; do
-            dotnet test "$proj" -c Release
-          done
+        run: dotnet test DotNetWind.slnx -c Release --no-restore
 
       - name: Pack
         run: dotnet pack src/DotNetWind.Cli/DotNetWind.Cli.csproj -c Release

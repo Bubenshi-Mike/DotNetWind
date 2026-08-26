@@ -29,12 +29,12 @@ public sealed class DoctorService : IDoctorService
     }
 
     public async Task<IReadOnlyList<DoctorCheckResult>> RunChecksAsync(
-        string? projectPath,
+        DoctorOptions options,
         CancellationToken cancellationToken = default)
     {
         var checks = new List<DoctorCheckResult>();
 
-        var detectResult = await _projectDetector.DetectAsync(projectPath, cancellationToken);
+        var detectResult = await _projectDetector.DetectAsync(options.ProjectPath, cancellationToken);
 
         checks.Add(detectResult.IsSuccess
             ? Pass("Project file found", $"Found: {Path.GetFileName(detectResult.Value!.ProjectFilePath)}")
@@ -77,15 +77,15 @@ public sealed class DoctorService : IDoctorService
                 : Fail("@tailwindcss/cli scripts", "Tailwind scripts not in package.json", "Run: dotnetwind init"));
         }
 
-        var inputCssPath = Path.Combine(project.ProjectDirectory, "Styles", "tailwind.css");
+        var inputCssPath = Path.Combine(project.ProjectDirectory, options.InputCssRelativePath.Replace('/', Path.DirectorySeparatorChar));
         checks.Add(_fileSystem.FileExists(inputCssPath)
-            ? Pass("Styles/tailwind.css found", inputCssPath)
-            : Fail("Styles/tailwind.css found", "Input CSS not found", "Run: dotnetwind init"));
+            ? Pass($"{options.InputCssRelativePath} found", inputCssPath)
+            : Fail($"{options.InputCssRelativePath} found", "Input CSS not found", "Run: dotnetwind init"));
 
-        var outputCssPath = Path.Combine(project.ProjectDirectory, "wwwroot", "css", "style.css");
+        var outputCssPath = Path.Combine(project.ProjectDirectory, options.OutputCssRelativePath.Replace('/', Path.DirectorySeparatorChar));
         checks.Add(_fileSystem.FileExists(outputCssPath)
-            ? Pass("wwwroot/css/style.css found", outputCssPath)
-            : Warn("wwwroot/css/style.css found", "Output CSS not found", "Run: dotnetwind build"));
+            ? Pass($"{options.OutputCssRelativePath} found", outputCssPath)
+            : Warn($"{options.OutputCssRelativePath} found", "Output CSS not found", "Run: dotnetwind build"));
 
         var hasMsBuildTarget = await _projectFileUpdater.HasTailwindBuildTargetAsync(project.ProjectFilePath, cancellationToken);
         checks.Add(hasMsBuildTarget
@@ -95,11 +95,12 @@ public sealed class DoctorService : IDoctorService
         var hostFile = _hostFileDetector.FindHostFile(project);
         if (hostFile is not null)
         {
-            var hasCssRef = _hostFileDetector.HasCssReference(hostFile, "css/style.css");
+            var cssHref = ProjectInfo.ToWebPath(options.OutputCssRelativePath);
+            var hasCssRef = _hostFileDetector.HasCssReference(hostFile, cssHref);
             checks.Add(hasCssRef
                 ? Pass("CSS reference in host file", $"Found in {Path.GetFileName(hostFile)}")
-                : Warn("CSS reference in host file", $"css/style.css not referenced in {Path.GetFileName(hostFile)}",
-                    $"Add: <link href=\"css/style.css\" rel=\"stylesheet\" /> to {Path.GetFileName(hostFile)}"));
+                : Warn("CSS reference in host file", $"{cssHref} not referenced in {Path.GetFileName(hostFile)}",
+                    $"Add: {project.GetCssLink(options.OutputCssRelativePath)} to {Path.GetFileName(hostFile)}"));
         }
         else
         {

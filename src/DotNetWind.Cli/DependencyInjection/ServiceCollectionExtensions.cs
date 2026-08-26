@@ -25,6 +25,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<DoctorUseCase>();
         services.AddTransient<CleanUseCase>();
         services.AddTransient<InfoUseCase>();
+        services.AddTransient<RepairUseCase>();
+        services.AddTransient<UninstallUseCase>();
 
         return services;
     }

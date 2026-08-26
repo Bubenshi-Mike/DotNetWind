@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a problem with DotNetWind
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: The exact DotNetWind command you ran.
+      placeholder: dotnetwind init --project MyApp.csproj
+    validations:
+      required: true
+  - type: dropdown
+    id: project-type
+    attributes:
+      label: Project type
+      options:
+        - Blazor Web App
+        - Blazor WebAssembly
+        - Blazor Server
+        - ASP.NET Core MVC
+        - Razor Pages
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Windows 11, Ubuntu 24.04, macOS
+    validations:
+      required: true
+  - type: input
+    id: dotnet
+    attributes:
+      label: .NET SDK version
+      placeholder: dotnet --version
+  - type: input
+    id: node
+    attributes:
+      label: Node.js and npm versions
+      placeholder: node --version; npm --version
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Doctor output
+      description: Paste `dotnetwind doctor --json` output if possible.
+      render: json
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What happened, what you expected, and any relevant project file snippets.
+    validations:
+      required: true
