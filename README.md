@@ -121,6 +121,8 @@ Options:
 - Razor Pages
 - Razor Class Libraries (`Microsoft.NET.Sdk.Razor`)
 
+See [the compatibility matrix](docs/compatibility-matrix.md) for detection rules, default paths, host-file behavior, and CSS link formats.
+
 ## What Gets Generated
 
 After `dotnetwind init`, your project will have:
