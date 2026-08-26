@@ -26,6 +26,19 @@ public sealed class FakeFileSystem : IFileSystem
 
     public void DeleteFile(string path) => _files.Remove(Normalize(path));
 
+    public void CopyFile(string sourcePath, string destinationPath, bool overwrite)
+    {
+        var normalizedSource = Normalize(sourcePath);
+        var normalizedDestination = Normalize(destinationPath);
+        if (!_files.TryGetValue(normalizedSource, out var content))
+            throw new FileNotFoundException($"File not found: {sourcePath}");
+
+        if (!overwrite && _files.ContainsKey(normalizedDestination))
+            throw new IOException($"File already exists: {destinationPath}");
+
+        _files[normalizedDestination] = content;
+    }
+
     public IEnumerable<string> EnumerateFiles(string directory, string searchPattern, SearchOption searchOption)
     {
         var normalizedDirectory = Normalize(directory);

@@ -25,6 +25,17 @@ public sealed class FakeFileSystem : IFileSystem
     public void CreateDirectory(string path) => _directories.Add(path);
     public void DeleteFile(string path) => _files.Remove(path);
 
+    public void CopyFile(string sourcePath, string destinationPath, bool overwrite)
+    {
+        if (!_files.TryGetValue(sourcePath, out var content))
+            throw new FileNotFoundException($"File not found: {sourcePath}");
+
+        if (!overwrite && _files.ContainsKey(destinationPath))
+            throw new IOException($"File already exists: {destinationPath}");
+
+        _files[destinationPath] = content;
+    }
+
     public IEnumerable<string> EnumerateFiles(string directory, string searchPattern, SearchOption searchOption) =>
         _files.Keys.Where(k => k.StartsWith(directory, StringComparison.OrdinalIgnoreCase));
 

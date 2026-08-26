@@ -8,5 +8,6 @@ public interface IFileSystem
     Task WriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default);
     void CreateDirectory(string path);
     void DeleteFile(string path);
+    void CopyFile(string sourcePath, string destinationPath, bool overwrite);
     IEnumerable<string> EnumerateFiles(string directory, string searchPattern, SearchOption searchOption);
 }
