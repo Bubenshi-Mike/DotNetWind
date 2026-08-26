@@ -17,7 +17,7 @@ public static class InitCommand
         };
         var frameworkOption = new Option<string?>("--framework")
         {
-            Description = "Project type when auto-detection is ambiguous: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages"
+            Description = "Project type when auto-detection is ambiguous: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library"
         };
         var inputOption = new Option<string>("--input")
         {
@@ -86,7 +86,7 @@ public static class InitCommand
 
             if (!TryParseProjectType(framework, out var forcedProjectType))
             {
-                console.WriteError($"Unknown framework '{framework}'. Valid values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages.");
+                console.WriteError($"Unknown framework '{framework}'. Valid values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library.");
                 return ExitCode.ValidationFailed;
             }
 
@@ -132,6 +132,11 @@ public static class InitCommand
                 console.WriteInfo($"Add the following to {Path.GetFileName(hostFile)}:");
                 console.WriteLine($"  {cssLink}");
             }
+            else if (projectInfo.ProjectType == DotNetProjectType.RazorClassLibrary)
+            {
+                console.WriteInfo("Add the following to the consuming app's layout or host file:");
+                console.WriteLine($"  {cssLink}");
+            }
             else
             {
                 console.WriteWarning("Could not detect host file. Add the CSS link manually:");
@@ -159,6 +164,7 @@ public static class InitCommand
             "blazor-webapp" or "blazor-web-app" or "webapp" or "blazorwebapp" => DotNetProjectType.BlazorWebApp,
             "mvc" => DotNetProjectType.Mvc,
             "razor-pages" or "razorpages" => DotNetProjectType.RazorPages,
+            "razor-class-library" or "razorclasslibrary" or "rcl" or "razor-sdk" => DotNetProjectType.RazorClassLibrary,
             _ => null
         };
 

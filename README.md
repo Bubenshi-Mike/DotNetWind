@@ -2,7 +2,7 @@
 
 > Tailwind CSS setup for .NET, without the pain.
 
-DotNetWind is a .NET CLI tool that configures Tailwind CSS v4 in Blazor, ASP.NET Core MVC, and Razor Pages projects — in one command.
+DotNetWind is a .NET CLI tool that configures Tailwind CSS v4 in Blazor, ASP.NET Core MVC, Razor Pages, and Razor Class Library projects — in one command.
 
 ## Installation
 
@@ -49,7 +49,7 @@ dotnetwind init [options]
 Options:
   --project <path>        Path to the .csproj file
   --framework <type>      Project type if auto-detection is ambiguous
-                          Values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages
+                          Values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library
   --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
   --output <path>         CSS output path (default: wwwroot/css/style.css)
   --skip-npm-install      Skip running npm install
@@ -117,6 +117,7 @@ Options:
 - Blazor Server
 - ASP.NET Core MVC
 - Razor Pages
+- Razor Class Libraries (`Microsoft.NET.Sdk.Razor`)
 
 ## What Gets Generated
 

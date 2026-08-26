@@ -93,7 +93,13 @@ public sealed class DoctorService : IDoctorService
             : Fail("MSBuild BuildTailwind target", "BuildTailwind target not in .csproj", "Run: dotnetwind init"));
 
         var hostFile = _hostFileDetector.FindHostFile(project);
-        if (hostFile is not null)
+        if (project.ProjectType == DotNetProjectType.RazorClassLibrary)
+        {
+            checks.Add(Pass(
+                "CSS reference in host file",
+                $"Razor Class Libraries do not define an app host file. Reference {project.GetCssLink(options.OutputCssRelativePath)} from the consuming app."));
+        }
+        else if (hostFile is not null)
         {
             var cssHref = ProjectInfo.ToWebPath(options.OutputCssRelativePath);
             var hasCssRef = _hostFileDetector.HasCssReference(hostFile, cssHref);
