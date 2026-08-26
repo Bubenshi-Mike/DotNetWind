@@ -25,6 +25,8 @@ public sealed class InitUseCase
             return Result<ProjectInfo>.Failure(detectResult.ErrorMessage!);
 
         var project = detectResult.Value!;
+        if (options.ForcedProjectType is not null)
+            project = project with { ProjectType = options.ForcedProjectType.Value };
 
         if (project.ProjectType == DotNetProjectType.Unknown)
             return Result<ProjectInfo>.Failure($"Could not determine project type for '{project.ProjectName}'. Use --framework to specify the project type.");
@@ -37,7 +39,7 @@ public sealed class InitUseCase
 
         var initResult = await _tailwindInitializer.InitializeAsync(project, paths, options, cancellationToken);
         if (initResult.IsFailure)
-            return Result<ProjectInfo>.Failure(initResult.ErrorMessage!);
+            return Result<ProjectInfo>.Failure(initResult.ErrorMessage!, initResult.ErrorKind);
 
         return Result<ProjectInfo>.Success(project);
     }

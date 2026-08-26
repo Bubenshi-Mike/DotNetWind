@@ -25,7 +25,14 @@ public sealed class ProcessRunner : IProcessRunner
             StartInfo = BuildStartInfo(resolvedFileName, arguments, workingDirectory)
         };
 
-        process.Start();
+        try
+        {
+            process.Start();
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            return new ProcessResult(127, "", ex.Message);
+        }
 
         var stdOut = await process.StandardOutput.ReadToEndAsync(cancellationToken);
         var stdErr = await process.StandardError.ReadToEndAsync(cancellationToken);
@@ -69,7 +76,15 @@ public sealed class ProcessRunner : IProcessRunner
             onError?.Invoke(e.Data);
         };
 
-        process.Start();
+        try
+        {
+            process.Start();
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            return new ProcessResult(127, "", ex.Message);
+        }
+
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
 

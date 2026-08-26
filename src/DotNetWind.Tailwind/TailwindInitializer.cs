@@ -6,6 +6,8 @@ public sealed class TailwindInitializer : ITailwindInitializer
     private readonly IPackageJsonManager _packageJsonManager;
     private readonly IProjectFileUpdater _projectFileUpdater;
     private readonly IProcessRunner _processRunner;
+    private readonly ITailwindRunner _tailwindRunner;
+    private readonly INodeJsInstaller _nodeJsInstaller;
     private readonly ILogger<TailwindInitializer> _logger;
 
     public TailwindInitializer(
@@ -13,12 +15,16 @@ public sealed class TailwindInitializer : ITailwindInitializer
         IPackageJsonManager packageJsonManager,
         IProjectFileUpdater projectFileUpdater,
         IProcessRunner processRunner,
+        ITailwindRunner tailwindRunner,
+        INodeJsInstaller nodeJsInstaller,
         ILogger<TailwindInitializer> logger)
     {
         _fileSystem = fileSystem;
         _packageJsonManager = packageJsonManager;
         _projectFileUpdater = projectFileUpdater;
         _processRunner = processRunner;
+        _tailwindRunner = tailwindRunner;
+        _nodeJsInstaller = nodeJsInstaller;
         _logger = logger;
     }
 
@@ -49,11 +55,33 @@ public sealed class TailwindInitializer : ITailwindInitializer
         if (csprojResult.IsFailure)
             return csprojResult;
 
+        if (!options.SkipNpmInstall || !options.SkipBuild)
+        {
+            var dependencyResult = await _nodeJsInstaller.EnsureNodeAndNpmAsync(
+                project.ProjectDirectory,
+                allowInstall: options.AssumeYes,
+                skipInstall: options.SkipNodeInstall,
+                cancellationToken: cancellationToken);
+
+            if (dependencyResult.IsFailure)
+                return dependencyResult;
+        }
+
         if (!options.SkipNpmInstall)
         {
             var npmResult = await _processRunner.RunAsync("npm", "install", project.ProjectDirectory, cancellationToken);
             if (!npmResult.IsSuccess)
-                return Result.Failure($"npm install failed (exit code {npmResult.ExitCode}):\n{npmResult.StandardError}");
+            {
+                var errorKind = npmResult.ExitCode == 127 ? ResultErrorKind.MissingDependency : ResultErrorKind.General;
+                return Result.Failure($"npm install failed (exit code {npmResult.ExitCode}):\n{npmResult.StandardError}", errorKind);
+            }
+        }
+
+        if (!options.SkipBuild)
+        {
+            var buildResult = await _tailwindRunner.BuildAsync(paths, minify: false, project.ProjectDirectory, cancellationToken);
+            if (buildResult.IsFailure)
+                return buildResult;
         }
 
         return Result.Success();

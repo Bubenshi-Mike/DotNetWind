@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPackageJsonManager, PackageJsonManager>();
         services.AddSingleton<ITailwindInitializer, TailwindInitializer>();
         services.AddSingleton<ITailwindRunner, TailwindRunner>();
+        services.AddSingleton<INodeJsInstaller, NodeJsInstaller>();
         services.AddSingleton<IDoctorService, DoctorService>();
         return services;
     }

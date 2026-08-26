@@ -15,4 +15,15 @@ public sealed class ProjectInfoTests
         var info = new ProjectInfo("/path/App.csproj", "/path", "App", "net10.0", type);
         info.GetDisplayName().ShouldBe(expected);
     }
+
+    [Theory]
+    [InlineData(DotNetProjectType.BlazorWebApp, "wwwroot/css/app.css", """<link href="css/app.css" rel="stylesheet" />""")]
+    [InlineData(DotNetProjectType.BlazorWebAssembly, "wwwroot/assets/site.css", """<link href="assets/site.css" rel="stylesheet" />""")]
+    [InlineData(DotNetProjectType.Mvc, "wwwroot/css/app.css", """<link href="~/css/app.css" rel="stylesheet" />""")]
+    [InlineData(DotNetProjectType.RazorPages, "assets/site.css", """<link href="~/assets/site.css" rel="stylesheet" />""")]
+    public void GetCssLink_ShouldUseConfiguredOutputPath(DotNetProjectType type, string outputPath, string expected)
+    {
+        var info = new ProjectInfo("/path/App.csproj", "/path", "App", "net10.0", type);
+        info.GetCssLink(outputPath).ShouldBe(expected);
+    }
 }
