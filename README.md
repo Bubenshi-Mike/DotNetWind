@@ -10,6 +10,12 @@ DotNetWind is a .NET CLI tool that configures Tailwind CSS v4 in Blazor, ASP.NET
 dotnet tool install --global DotNetWind
 ```
 
+Already installed? Upgrade the global tool with:
+
+```bash
+dotnet tool update --global DotNetWind
+```
+
 ## Quick Start
 
 ```bash
@@ -37,6 +43,7 @@ That's it. DotNetWind will:
 | `dotnetwind clean` | Remove generated CSS output |
 | `dotnetwind info` | Display project and tool information |
 | `dotnetwind repair` | Re-apply missing DotNetWind setup files/configuration |
+| `dotnetwind update` | Upgrade an existing DotNetWind setup to current scripts and Tailwind packages |
 | `dotnetwind uninstall` | Remove DotNetWind build configuration and generated CSS output |
 
 ## Command Options
@@ -100,6 +107,26 @@ Options:
   --force                 Overwrite existing Tailwind input file
   --yes                   Allow non-interactive installation of missing prerequisites
   --dry-run               Show what would be repaired without changing files or running commands
+```
+
+### `dotnetwind update`
+
+```bash
+dotnetwind update [options]
+dotnetwind upgrade [options]
+
+Options:
+  --project <path>        Path to the .csproj file
+  --framework <type>      Project type if auto-detection is ambiguous
+                          Values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library
+  --input <path>          Tailwind CSS input path (default: Styles/tailwind.css)
+  --output <path>         CSS output path (default: wwwroot/css/style.css)
+  --skip-npm-install      Skip running npm install
+  --skip-node-install     Do not install Node.js automatically if node/npm are missing
+  --skip-build            Skip running Tailwind build
+  --force                 Overwrite existing Tailwind input file
+  --yes                   Allow non-interactive installation of missing prerequisites
+  --dry-run               Show what would be updated without changing files or running commands
 ```
 
 ### `dotnetwind uninstall`
