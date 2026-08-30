@@ -9,6 +9,7 @@ public sealed record SetupOptions(
     bool SkipNodeInstall = false,
     bool SkipBuild = false,
     bool Force = false,
+    bool RefreshPackageJsonEntries = false,
     bool AssumeYes = false,
     bool DryRun = false,
     bool Verbose = false);
