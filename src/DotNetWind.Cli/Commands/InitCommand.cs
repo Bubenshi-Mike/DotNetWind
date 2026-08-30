@@ -17,7 +17,7 @@ public static class InitCommand
         };
         var frameworkOption = new Option<string?>("--framework")
         {
-            Description = "Project type when auto-detection is ambiguous: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages"
+            Description = "Project type when auto-detection is ambiguous: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library"
         };
         var inputOption = new Option<string>("--input")
         {
@@ -45,6 +45,10 @@ public static class InitCommand
         {
             Description = "Allow non-interactive installation of missing prerequisites"
         };
+        var dryRunOption = new Option<bool>("--dry-run")
+        {
+            Description = "Show what would be configured without changing files or running commands"
+        };
         var forceOption = new Option<bool>("--force")
         {
             Description = "Overwrite existing files"
@@ -63,6 +67,7 @@ public static class InitCommand
         command.Options.Add(skipBuildOption);
         command.Options.Add(forceOption);
         command.Options.Add(yesOption);
+        command.Options.Add(dryRunOption);
         command.Options.Add(verboseOption);
 
         command.SetAction(async (parseResult, cancellationToken) =>
@@ -76,6 +81,7 @@ public static class InitCommand
             var skipBuild = parseResult.GetValue(skipBuildOption);
             var force = parseResult.GetValue(forceOption);
             var assumeYes = parseResult.GetValue(yesOption);
+            var dryRun = parseResult.GetValue(dryRunOption);
             var verbose = parseResult.GetValue(verboseOption);
 
             var console = (IConsoleOutput)services.GetService(typeof(IConsoleOutput))!;
@@ -86,7 +92,7 @@ public static class InitCommand
 
             if (!TryParseProjectType(framework, out var forcedProjectType))
             {
-                console.WriteError($"Unknown framework '{framework}'. Valid values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages.");
+                console.WriteError($"Unknown framework '{framework}'. Valid values: blazor-wasm, blazor-server, blazor-webapp, mvc, razor-pages, razor-class-library.");
                 return ExitCode.ValidationFailed;
             }
 
@@ -100,6 +106,7 @@ public static class InitCommand
                 SkipBuild: skipBuild,
                 Force: force,
                 AssumeYes: assumeYes,
+                DryRun: dryRun,
                 Verbose: verbose);
 
             console.WriteAction("Detecting project...");
@@ -112,6 +119,19 @@ public static class InitCommand
             }
 
             var projectInfo = result.Value!;
+            if (dryRun)
+            {
+                console.WriteSuccess($"Dry run complete for {projectInfo.ProjectName} ({projectInfo.GetDisplayName()})");
+                console.WriteInfo($"Would create or update: {input}");
+                console.WriteInfo("Would create or merge: package.json");
+                console.WriteInfo("Would add or preserve: BuildTailwind MSBuild target");
+                if (!skipNpm)
+                    console.WriteInfo("Would run: npm install");
+                if (!skipBuild)
+                    console.WriteInfo("Would run: npm run tw:build");
+                return ExitCode.Success;
+            }
+
             console.WriteSuccess($"Project: {projectInfo.ProjectName} ({projectInfo.GetDisplayName()})");
             console.WriteSuccess($"Framework: {projectInfo.TargetFramework ?? "unknown"}");
             console.WriteSuccess("Styles/tailwind.css created");
@@ -130,6 +150,11 @@ public static class InitCommand
             if (hostFile is not null)
             {
                 console.WriteInfo($"Add the following to {Path.GetFileName(hostFile)}:");
+                console.WriteLine($"  {cssLink}");
+            }
+            else if (projectInfo.ProjectType == DotNetProjectType.RazorClassLibrary)
+            {
+                console.WriteInfo("Add the following to the consuming app's layout or host file:");
                 console.WriteLine($"  {cssLink}");
             }
             else
@@ -159,6 +184,7 @@ public static class InitCommand
             "blazor-webapp" or "blazor-web-app" or "webapp" or "blazorwebapp" => DotNetProjectType.BlazorWebApp,
             "mvc" => DotNetProjectType.Mvc,
             "razor-pages" or "razorpages" => DotNetProjectType.RazorPages,
+            "razor-class-library" or "razorclasslibrary" or "rcl" or "razor-sdk" => DotNetProjectType.RazorClassLibrary,
             _ => null
         };
 

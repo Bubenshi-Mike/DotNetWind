@@ -42,11 +42,17 @@ public sealed class TailwindInitializer : ITailwindInitializer
         var inputRelative = GetRelativePath(project.ProjectDirectory, paths.InputCssPath);
         var outputRelative = GetRelativePath(project.ProjectDirectory, paths.OutputCssPath);
 
-        var packageJsonResult = await _packageJsonManager.CreateOrMergeAsync(
-            paths.PackageJsonPath,
-            inputRelative,
-            outputRelative,
-            cancellationToken);
+        var packageJsonResult = options.RefreshPackageJsonEntries
+            ? await _packageJsonManager.RefreshManagedEntriesAsync(
+                paths.PackageJsonPath,
+                inputRelative,
+                outputRelative,
+                cancellationToken)
+            : await _packageJsonManager.CreateOrMergeAsync(
+                paths.PackageJsonPath,
+                inputRelative,
+                outputRelative,
+                cancellationToken);
 
         if (packageJsonResult.IsFailure)
             return packageJsonResult;

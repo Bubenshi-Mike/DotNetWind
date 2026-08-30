@@ -15,12 +15,16 @@ public sealed record ProjectInfo(
         DotNetProjectType.Mvc => "ASP.NET Core MVC",
         DotNetProjectType.RazorPages => "Razor Pages",
         DotNetProjectType.MauiHybrid => ".NET MAUI Hybrid",
+        DotNetProjectType.RazorClassLibrary => "Razor Class Library",
         _ => "Unknown"
     };
 
     public string GetCssLink(string outputCssRelativePath = "wwwroot/css/style.css")
     {
         var href = ToWebPath(outputCssRelativePath);
+        if (ProjectType == DotNetProjectType.RazorClassLibrary)
+            href = $"_content/{ProjectName}/{href}";
+
         if (ProjectType is DotNetProjectType.Mvc or DotNetProjectType.RazorPages)
             href = "~/" + href;
 

@@ -1,13 +1,15 @@
 namespace DotNetWind.Cli.Commands;
 
-public static class RepairCommand
+public static class UpdateCommand
 {
     public static Command Create(IServiceProvider services)
     {
-        var command = new Command("repair")
+        var command = new Command("update")
         {
-            Description = "Re-apply the DotNetWind setup to repair missing generated files or configuration"
+            Description = "Upgrade an existing DotNetWind setup to the current generated scripts and Tailwind packages"
         };
+
+        command.Aliases.Add("upgrade");
 
         var projectOption = new Option<string?>("--project")
         {
@@ -49,7 +51,7 @@ public static class RepairCommand
         };
         var dryRunOption = new Option<bool>("--dry-run")
         {
-            Description = "Show what would be repaired without changing files or running commands"
+            Description = "Show what would be updated without changing files or running commands"
         };
 
         command.Options.Add(projectOption);
@@ -66,10 +68,10 @@ public static class RepairCommand
         command.SetAction(async (parseResult, cancellationToken) =>
         {
             var console = (IConsoleOutput)services.GetService(typeof(IConsoleOutput))!;
-            var useCase = (RepairUseCase)services.GetService(typeof(RepairUseCase))!;
+            var useCase = (UpdateUseCase)services.GetService(typeof(UpdateUseCase))!;
 
-            console.WriteHeader("DotNetWind Repair");
-            console.WriteAction("Re-applying DotNetWind setup...");
+            console.WriteHeader("DotNetWind Update");
+            console.WriteAction("Refreshing DotNetWind setup...");
 
             var framework = parseResult.GetValue(frameworkOption);
             if (!TryParseProjectType(framework, out var forcedProjectType))
@@ -98,9 +100,14 @@ public static class RepairCommand
             }
 
             if (options.DryRun)
+            {
                 console.WriteSuccess($"Dry run complete for {result.Value!.ProjectName}");
+                console.WriteInfo("Would refresh DotNetWind-managed package.json scripts and Tailwind dependencies");
+            }
             else
-                console.WriteSuccess($"Repaired: {result.Value!.ProjectName}");
+            {
+                console.WriteSuccess($"Updated: {result.Value!.ProjectName}");
+            }
 
             return ExitCode.Success;
         });

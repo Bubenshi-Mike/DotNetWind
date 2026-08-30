@@ -64,6 +64,7 @@ public sealed class HostFileDetector : IHostFileDetector
             [
                 Path.Combine("Pages", "Shared", "_Layout.cshtml")
             ],
+            DotNetProjectType.RazorClassLibrary => [],
             _ => []
         };
 }
