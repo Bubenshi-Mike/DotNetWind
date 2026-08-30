@@ -12,7 +12,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      # Full history (not the default shallow clone) - Directory.Build.props derives the package
+      # version from the count of "Merge pull request" commits via
+      # `git rev-list --count --merges --grep=...`, which needs the whole history to be accurate.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v4
         with:
