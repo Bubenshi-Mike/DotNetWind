@@ -6,6 +6,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>DotNetWind.Tailwind</RootNamespace>
     <AssemblyName>DotNetWind.Tailwind</AssemblyName>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNetWind.Core\DotNetWind.Core.csproj" />

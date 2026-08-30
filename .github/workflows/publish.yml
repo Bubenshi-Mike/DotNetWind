@@ -1,8 +1,20 @@
+# Push the DotNetWind global tool to NuGet.org on every merge to main that actually touches
+# something the packed tool ships (any src/ project, shared build/version metadata, or the
+# embedded README/icon), and unconditionally on a manual workflow_dispatch run as an explicit
+# override. The package version is always computed from the merge count (see
+# Directory.Build.props) - never hand-edited in the csproj.
+# A docs-only, CI-only, or test-only merge to main is intentionally skipped (see the "Decide
+# whether to publish" step) so the published version doesn't churn for changes that don't affect
+# the packed tool.
+# Uses NuGet Trusted Publishing (OIDC via NuGet/login@v1) - no stored API key needed; the repo
+# must already be registered as a trusted publisher for the DotNetWind package on nuget.org
+# (Package Settings -> Trusted Publishing), which it already was before this workflow existed.
+
 name: Publish to NuGet
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -13,26 +25,70 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      # Full history (not the default shallow clone) - the package version is derived from the
+      # count of "Merge pull request" commits via `git rev-list --count --merges --grep=...`
+      # (see Directory.Build.props), which needs the whole history to be accurate.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # A manual workflow_dispatch run is a deliberate, explicit "publish this" act - always
+      # honor it regardless of what changed. A push to main only publishes if it touched
+      # something that actually ends up in the packed tool: any src/ project, shared
+      # build/version metadata, or the README/icon the package embeds. Anything else (docs,
+      # CI-only tweaks, tests, maintenance-plan updates, etc.) is skipped so the published
+      # version doesn't churn for changes nobody installing the tool would ever see.
+      - name: Decide whether to publish
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only HEAD^ HEAD)
+          echo "Changed paths:"
+          echo "$changed"
+          if echo "$changed" | grep -qE '^src/|^(Directory\.Build\.props|Directory\.Build\.targets|README\.md|assets/icon\.png)$'; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/setup-dotnet@v4
+        if: steps.gate.outputs.publish == 'true'
         with:
           dotnet-version: 10.0.x
 
       - name: Restore
+        if: steps.gate.outputs.publish == 'true'
         run: dotnet restore DotNetWind.slnx
 
       - name: Test
+        if: steps.gate.outputs.publish == 'true'
         run: dotnet test DotNetWind.slnx -c Release --no-restore
 
+      # Same Major.Minor.0 computation as the fallback target in Directory.Build.props, but
+      # without the -g{sha} suffix - this is a public release, not a CI build artifact. The base
+      # "0" here must be kept in sync by hand with DotNetWindVersionMajorBase in
+      # Directory.Build.props - bump both together for a real breaking-change milestone.
+      - name: Compute version
+        id: version
+        if: steps.gate.outputs.publish == 'true'
+        run: |
+          count=$(git rev-list --count --merges --grep="^Merge pull request" HEAD)
+          echo "value=$(( 0 + count / 10 )).$(( count % 10 )).0" >> "$GITHUB_OUTPUT"
+
       - name: Pack
-        run: dotnet pack src/DotNetWind.Cli/DotNetWind.Cli.csproj -c Release
+        if: steps.gate.outputs.publish == 'true'
+        run: dotnet pack src/DotNetWind.Cli/DotNetWind.Cli.csproj -c Release -p:Version=${{ steps.version.outputs.value }}
 
       - name: NuGet login (OIDC)
+        if: steps.gate.outputs.publish == 'true'
         uses: NuGet/login@v1
         id: login
         with:
           user: Bubenshi
 
       - name: Push to NuGet.org
+        if: steps.gate.outputs.publish == 'true'
         run: dotnet nuget push nupkg/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

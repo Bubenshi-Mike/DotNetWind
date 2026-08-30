@@ -18,10 +18,15 @@
 
 ## Release Checklist
 
-- Restore, build, test, and pack from a clean checkout.
-- Run the CLI smoke-test matrix on Windows and Linux.
-- Confirm README command options match `dotnetwind --help` and command-specific help.
-- Publish only from a tagged release or an explicit workflow dispatch.
+- Package versioning and publishing are automatic (`publish.yml`): every merge to `main` that
+  touches a `src/` project, `Directory.Build.props`/`Directory.Build.targets`, or the embedded
+  README/icon computes a new `Major.Minor.0` version (see `Directory.Build.props`) and pushes it
+  to NuGet.org via Trusted Publishing. A docs-only or test-only merge is skipped automatically.
+  A manual `workflow_dispatch` run always publishes regardless of what changed, as an explicit
+  override.
+- Before merging anything meant to ship: run the CLI smoke-test matrix on Windows and Linux, and
+  confirm README command options match `dotnetwind --help` and command-specific help - once
+  merged, it publishes with no further manual step.
 
 ## Support Triage
 

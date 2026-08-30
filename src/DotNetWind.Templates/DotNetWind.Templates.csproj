@@ -6,6 +6,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>DotNetWind.Templates</RootNamespace>
     <AssemblyName>DotNetWind.Templates</AssemblyName>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNetWind.Core\DotNetWind.Core.csproj" />

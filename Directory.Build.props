@@ -1,0 +1,70 @@
+<Project>
+  <PropertyGroup Label="NuGet / assembly">
+    <Authors>Bubenshi</Authors>
+    <Company>DotNetWind contributors</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Bubenshi-Mike/DotNetWind</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Bubenshi-Mike/DotNetWind.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!--
+    Package version: MajorBase + floor(MergeCount / 10) . (MergeCount mod 10), where MergeCount
+    is the number of "Merge pull request #N" commits reachable from HEAD - one increment per PR
+    actually merged into main, not per individual commit. Minor cycles 0-9 and rolls into an
+    extra Major increment every 10 merges, so every published version keeps strictly increasing
+    even as Minor wraps. Same scheme as Syntra (see that repo's Directory.Build.props for the
+    fuller rationale) - kept identical across both repos for one shared mental model, even though
+    the floating-reference monotonicity concern that originally motivated the wraparound doesn't
+    really apply to a globally-installed CLI tool (installs are pinned/explicit, not floating).
+
+    MajorBase stays at 0 (this tool is still pre-1.0/evolving) and is bumped by hand for a real
+    breaking-change milestone; the automatic +1 on top only exists to keep versions increasing
+    as Minor cycles.
+
+    NuGet package versions must be valid SemVer (3+ numeric segments), so the actual packed
+    version comes out as Major.Minor.0 - the trailing .0 is NuGet's own mandatory padding, not a
+    meaningful third dimension.
+
+    CI computes and passes the real value explicitly via -p:Version= (see ci.yml/publish.yml).
+    This target is only a same-machine fallback so a plain local `dotnet build`/`pack` never
+    silently produces the SDK's own "1.0.0" default; it's skipped entirely whenever Version was
+    already supplied on the command line.
+  -->
+  <PropertyGroup>
+    <DotNetWindVersionMajorBase>0</DotNetWindVersionMajorBase>
+  </PropertyGroup>
+
+  <!--
+    The SDK sets a parse-time default of Version=1.0.0 before this target's Condition is ever
+    checked (parse-time PropertyGroups run before any target executes), so checking only for
+    empty never catches it - the SDK's own default must be matched explicitly too.
+  -->
+  <Target Name="DotNetWindComputeFallbackVersion" BeforeTargets="GetPackageVersion;GenerateNuspec;CoreCompile" Condition="'$(Version)' == '' Or '$(Version)' == '1.0.0'">
+    <Exec Command="git rev-list --count --merges --grep=&quot;^Merge pull request&quot; HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_DotNetWindMergeCount" />
+    </Exec>
+    <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_DotNetWindGitSha" />
+    </Exec>
+    <PropertyGroup>
+      <_DotNetWindMergeCount Condition="'$(_DotNetWindMergeCount)' == ''">0</_DotNetWindMergeCount>
+      <_DotNetWindGitSha Condition="'$(_DotNetWindGitSha)' == ''">unknown</_DotNetWindGitSha>
+      <_DotNetWindMinor>$([MSBuild]::Modulo($(_DotNetWindMergeCount), 10))</_DotNetWindMinor>
+      <_DotNetWindMajorBumpTimes10>$([MSBuild]::Subtract($(_DotNetWindMergeCount), $(_DotNetWindMinor)))</_DotNetWindMajorBumpTimes10>
+      <_DotNetWindMajorBump>$([MSBuild]::Divide($(_DotNetWindMajorBumpTimes10), 10))</_DotNetWindMajorBump>
+      <_DotNetWindMajor>$([MSBuild]::Add($(DotNetWindVersionMajorBase), $(_DotNetWindMajorBump)))</_DotNetWindMajor>
+      <Version>$(_DotNetWindMajor).$(_DotNetWindMinor)-g$(_DotNetWindGitSha)</Version>
+      <PackageVersion>$(Version)</PackageVersion>
+    </PropertyGroup>
+  </Target>
+</Project>
