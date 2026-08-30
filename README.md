@@ -215,7 +215,7 @@ After `dotnetwind init`, your project will have:
 ## Requirements
 
 - .NET 10 SDK or later
-- Node.js 18+ and npm. If Node.js/npm are missing, `dotnetwind init --yes` attempts to install Node.js LTS automatically on Windows through `winget`. Use `--skip-node-install` to prevent automatic installation, or `--skip-npm-install --skip-build` for offline/config-only setup.
+- Node.js 18+ and npm. On Windows, if Node.js/npm are missing, `dotnetwind init --yes` attempts to install Node.js LTS automatically through `winget`. Use `--skip-node-install` to prevent automatic installation, or `--skip-npm-install --skip-build` for offline/config-only setup. On Linux/macOS, install Node.js yourself first — automatic installation isn't available there yet, and `dotnetwind` will tell you so clearly rather than failing unexpectedly if Node/npm are missing.
 
 ## Architecture
 
@@ -235,6 +235,13 @@ DotNetWind.sln
     ├── DotNetWind.Tailwind.Tests
     └── DotNetWind.Cli.Tests
 ```
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the dependency direction and command flow
+behind this layout.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for coding conventions. Security issues: see [SECURITY.md](SECURITY.md) rather than filing a public issue.
 
 ## License
 
