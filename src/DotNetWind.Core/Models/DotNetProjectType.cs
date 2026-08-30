@@ -8,5 +8,6 @@ public enum DotNetProjectType
     BlazorWebApp = 3,
     Mvc = 4,
     RazorPages = 5,
-    MauiHybrid = 6
+    MauiHybrid = 6,
+    RazorClassLibrary = 7
 }

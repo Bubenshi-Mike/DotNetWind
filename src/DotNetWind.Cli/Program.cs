@@ -24,6 +24,7 @@ rootCommand.Subcommands.Add(DoctorCommand.Create(services));
 rootCommand.Subcommands.Add(CleanCommand.Create(services));
 rootCommand.Subcommands.Add(InfoCommand.Create(services));
 rootCommand.Subcommands.Add(RepairCommand.Create(services));
+rootCommand.Subcommands.Add(UpdateCommand.Create(services));
 rootCommand.Subcommands.Add(UninstallCommand.Create(services));
 
 return await rootCommand.Parse(args).InvokeAsync();

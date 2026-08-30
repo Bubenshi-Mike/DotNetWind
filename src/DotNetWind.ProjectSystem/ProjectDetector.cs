@@ -92,6 +92,9 @@ public sealed class ProjectDetector : IProjectDetector
 
     private DotNetProjectType DetectProjectType(string content, string projectDirectory)
     {
+        if (IsRazorClassLibrary(content))
+            return DotNetProjectType.RazorClassLibrary;
+
         if (content.Contains("Microsoft.NET.Sdk.BlazorWebAssembly", StringComparison.OrdinalIgnoreCase) ||
             content.Contains("Microsoft.AspNetCore.Components.WebAssembly", StringComparison.OrdinalIgnoreCase) ||
             _fileSystem.FileExists(Path.Combine(projectDirectory, "wwwroot", "index.html")))
@@ -134,4 +137,7 @@ public sealed class ProjectDetector : IProjectDetector
     private bool IsRazorPages(string projectDirectory) =>
         _fileSystem.DirectoryExists(Path.Combine(projectDirectory, "Pages")) &&
         _fileSystem.FileExists(Path.Combine(projectDirectory, "Pages", "Shared", "_Layout.cshtml"));
+
+    private static bool IsRazorClassLibrary(string content) =>
+        content.Contains("Microsoft.NET.Sdk.Razor", StringComparison.OrdinalIgnoreCase);
 }

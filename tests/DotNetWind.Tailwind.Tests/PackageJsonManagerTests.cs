@@ -55,6 +55,44 @@ public sealed class PackageJsonManagerTests
     }
 
     [Fact]
+    public async Task RefreshManagedEntriesAsync_WhenFileExists_UpdatesDotNetWindEntries()
+    {
+        var existing =
+            """
+            {
+              "name": "my-app",
+              "scripts": {
+                "start": "dotnet run",
+                "tw:build": "tailwindcss -i old.css -o old.css",
+                "tw:build:min": "tailwindcss -i old.css -o old.css --minify",
+                "tw:watch": "tailwindcss -i old.css -o old.css --watch"
+              },
+              "devDependencies": {
+                "tailwindcss": "3.4.0",
+                "@tailwindcss/cli": "3.4.0",
+                "vite": "latest"
+              }
+            }
+            """;
+        var fs = new FakeFileSystem();
+        fs.AddFile(PackageJsonPath, existing);
+        var manager = CreateManager(fs);
+
+        var result = await manager.RefreshManagedEntriesAsync(PackageJsonPath, "Styles/tailwind.css", "wwwroot/css/style.css");
+
+        result.IsSuccess.ShouldBeTrue();
+        var content = fs.GetWrittenContent(PackageJsonPath)!;
+        content.ShouldContain("\"start\": \"dotnet run\"");
+        content.ShouldContain("\"vite\": \"latest\"");
+        content.ShouldContain("\"tw:build\": \"npx @tailwindcss/cli -i Styles/tailwind.css -o wwwroot/css/style.css\"");
+        content.ShouldContain("\"tw:build:min\": \"npx @tailwindcss/cli -i Styles/tailwind.css -o wwwroot/css/style.css --minify\"");
+        content.ShouldContain("\"tw:watch\": \"npx @tailwindcss/cli -i Styles/tailwind.css -o wwwroot/css/style.css --watch\"");
+        content.ShouldContain("\"tailwindcss\": \"latest\"");
+        content.ShouldContain("\"@tailwindcss/cli\": \"latest\"");
+        content.ShouldNotContain("old.css");
+    }
+
+    [Fact]
     public async Task HasTailwindScriptsAsync_WhenScriptsPresent_ReturnsTrue()
     {
         var json = """{"scripts": {"tw:build": "npx @tailwindcss/cli -i input.css -o output.css"}}""";
