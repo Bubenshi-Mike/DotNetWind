@@ -8,6 +8,7 @@
     <RootNamespace>DotNetWind.Cli.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\DotNetWind.Cli\DotNetWind.Cli.csproj" />
     <ProjectReference Include="..\..\src\DotNetWind.Core\DotNetWind.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
