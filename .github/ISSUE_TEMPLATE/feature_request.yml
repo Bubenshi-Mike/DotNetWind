@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest an idea or improvement for DotNetWind
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What are you trying to do that DotNetWind doesn't support today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like DotNetWind to do instead? A new command/option, a change to existing behavior, etc.
+    validations:
+      required: true
+  - type: dropdown
+    id: project-type
+    attributes:
+      label: Project type this affects (if relevant)
+      options:
+        - Blazor Web App
+        - Blazor WebAssembly
+        - Blazor Server
+        - ASP.NET Core MVC
+        - Razor Pages
+        - Razor Class Library
+        - All / not project-type-specific
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds you're using today, or other approaches you considered.
